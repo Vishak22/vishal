@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Blog — Delightfully Animated</title>
+  <meta name="description" content="A modern, animated blog with a tiny router, RSS, sitemap, offline support, comments, and dark mode. No build tools." />
+  <meta name="author" content="Vishal" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="canonical" href="https://example.com/" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="My Animated Blog" />
+  <meta property="og:description" content="Clean UI. Smooth motion. Fast." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { display: ['Inter','system-ui','Segoe UI','Arial','sans-serif'], body: ['Inter','system-ui','Segoe UI','Arial','sans-serif'] }, boxShadow: { soft:'0 10px 30px rgba(2,6,23,.08)', float:'0 20px 50px -10px rgba(2,6,23,.15)' }, keyframes: { fadeUp:{'0%':{opacity:0,transform:'translateY(16px)'},'100%':{opacity:1,transform:'translateY(0)'}}, scaleIn:{'0%':{opacity:0,transform:'scale(.96)'},'100%':{opacity:1,transform:'scale(1)'}}, shimmer:{'0%':{backgroundPosition:'200% 0'},'100%':{backgroundPosition:'-200% 0'}} }, animation:{ fadeUp:'fadeUp .6s ease-out both', scaleIn:'scaleIn .5s ease-out both', shimmer:'shimmer 2.5s linear infinite' }, backgroundImage:{ glow:'radial-gradient(1200px 400px at 50% -10%, rgba(56,189,248,.25), rgba(56,189,248,0))' } } }, darkMode:'class'
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Manifest (injected via JS) -->
+  <link id="manifestLink" rel="manifest" href="#" />
+
+  <!-- Custom CSS -->
+  <style>
+    :root{ --brand: #0ea5e9; --brand-2:#06b6d4; }
+    *{ transition: background-color .25s ease, color .25s ease, border-color .25s ease; }
+    .parallax { transform: translateY(calc(var(--scroll, 0) * 0.2px)); }
+    .tilt { transform-style: preserve-3d; will-change: transform; }
+    .tilt-inner { transform: translateZ(24px); }
+    .prose{ font-size: 1.05rem; line-height: 1.75; }
+    .prose p{ margin: .9rem 0; }
+    .prose h1,.prose h2,.prose h3{ font-weight: 700; line-height: 1.25; margin: 1.4rem 0 .6rem }
+    .prose h2{ font-size: 1.5rem }
+    .prose h3{ font-size: 1.25rem }
+    .prose ul{ list-style: disc; padding-left: 1.25rem; margin: .75rem 0 }
+    .prose ol{ list-style: decimal; padding-left: 1.25rem; margin: .75rem 0 }
+    .prose blockquote{ border-left: 4px solid var(--brand); padding-left: .9rem; margin: 1rem 0; opacity: .9 }
+    .prose code{ background: rgba(148,163,184,.2); padding: .15rem .35rem; border-radius: .4rem; font-size: .95em }
+    .toast{ position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); background: #0ea5e9; color: #fff; padding: .6rem .9rem; border-radius: .75rem; box-shadow: 0 20px 50px -10px rgba(2,6,23,.15); opacity: 0; pointer-events: none; transition: opacity .25s ease; z-index: 80 }
+    .toast.show{ opacity: 1; }
+  </style>
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json" id="jsonld"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-body">
+  <a href="#content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:bg-white focus:text-slate-900 focus:px-3 focus:py-2 focus:rounded-md focus:shadow">Skip to content</a>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-slate-900/70 border-b border-slate-200/60 dark:border-slate-700/50 animate-fadeUp">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="#/" class="flex items-center gap-2 group">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white shadow-soft group-hover:scale-105">✦</span>
+          <span class="font-display text-lg font-semibold tracking-tight">My Blog</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6">
+          <a href="#/" class="hover:text-sky-600 dark:hover:text-sky-400">Home</a>
+          <a href="#/tags" class="hover:text-sky-600 dark:hover:text-sky-400">Tags</a>
+          <a href="#/about" class="hover:text-sky-600 dark:hover:text-sky-400">About</a>
+          <a href="#/contact" class="hover:text-sky-600 dark:hover:text-sky-400">Contact</a>
+        </nav>
+        <div class="flex items-center gap-2">
+          <label for="search" class="sr-only">Search</label>
+          <input id="search" type="search" placeholder="Search… (⌘/Ctrl K)" class="hidden sm:block h-10 w-56 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/70 dark:bg-slate-800/70 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          <button id="themeToggle" class="h-10 w-10 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/70 dark:bg-slate-800/70 grid place-items-center" aria-label="Toggle dark mode"><span id="themeIcon">🌙</span></button>
+          <button id="menuBtn" class="md:hidden h-10 w-10 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/70 dark:bg-slate-800/70 grid place-items-center" aria-label="Open menu">☰</button>
+        </div>
+      </div>
+      <div id="mobileNav" class="md:hidden hidden pb-4 animate-fadeUp">
+        <nav class="flex flex-col gap-2">
+          <a href="#/" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Home</a>
+          <a href="#/tags" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Tags</a>
+          <a href="#/about" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
+          <a href="#/contact" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
+          <input id="msearch" type="search" placeholder="Search…" class="mt-2 h-10 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/70 dark:bg-slate-800/70 px-3 text-sm" />
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden" id="hero">
+    <div class="absolute inset-0 -z-10 bg-glow parallax"></div>
+    <div class="max-w-6xl mx-auto px-4 py-16 lg:py-20">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="reveal">
+          <h1 class="font-display text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight">
+            Share your <span class="text-sky-600 dark:text-sky-400">stories</span> with motion that feels natural.
+          </h1>
+          <p class="mt-4 text-slate-600 dark:text-slate-300 max-w-prose">Now with a tiny router, single‑post pages, comments, likes, tags, command palette, RSS, sitemap, PWA offline, and analytics hooks.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#/" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 text-white px-5 py-3 font-medium shadow-float hover:translate-y-[-1px]">Browse Posts →</a>
+            <a href="#/about" class="inline-flex items-center gap-2 rounded-xl border border-sky-300/60 dark:border-sky-700/60 px-5 py-3 font-medium hover:bg-slate-100 dark:hover:bg-slate-800">About the Author</a>
+          </div>
+        </div>
+        <div class="rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200/70 dark:ring-slate-700/50 reveal">
+          <img src="https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1400&auto=format&fit=crop" alt="Workspace" class="w-full h-72 object-cover" />
+          <div class="h-1 bg-gradient-to-r from-sky-400 via-cyan-400 to-sky-400 animate-shimmer bg-[length:300%_100%]"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Outlet for Router -->
+  <main id="content" class="max-w-6xl mx-auto px-4 pb-24"></main>
+
+  <!-- Footer -->
+  <footer id="contact" class="border-t border-slate-200/70 dark:border-slate-700/50">
+    <div class="max-w-6xl mx-auto px-4 py-10">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 reveal">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-600 text-white">✦</span>
+            <span class="font-semibold">My Blog</span>
+          </div>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300 max-w-xs">Clean, fast, and accessible blog you can deploy anywhere.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold">Site</h4>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/">Home</a></li>
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/tags">Tags</a></li>
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/about">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold">Resources</h4>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/rss">RSS</a></li>
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/sitemap">Sitemap.xml</a></li>
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/robots">Robots.txt</a></li>
+            <li><a class="hover:text-sky-600 dark:hover:text-sky-400" href="#/privacy">Privacy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold">Newsletter</h4>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">A round‑up of new posts, once a week.</p>
+          <form id="newsletter" class="mt-3">
+            <input name="email" type="email" placeholder="you@example.com" required class="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/60 px-3 text-sm" />
+            <button class="mt-2 w-full h-10 rounded-lg bg-gradient-to-r from-sky-600 to-cyan-500 text-white text-sm font-medium">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-8 text-xs text-slate-500 dark:text-slate-400">© <span id="year"></span> My Blog. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Floating Action Button + Progress -->
+  <button id="fab" class="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-float bg-gradient-to-br from-sky-600 to-cyan-500 text-white text-xl grid place-items-center hover:scale-[1.03] focus:outline-none" aria-label="Open command palette">✍️</button>
+  <div id="progress" class="fixed bottom-6 left-6 h-14 w-14 rounded-full grid place-items-center border border-slate-300/70 dark:border-slate-700/60 cursor-pointer" title="Back to top" aria-label="Back to top">
+    <svg viewBox="0 0 36 36" class="h-10 w-10 -rotate-90">
+      <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" opacity="0.2" stroke-width="3" />
+      <circle id="progressArc" cx="18" cy="18" r="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="100 100" stroke-dashoffset="100" />
+    </svg>
+  </div>
+
+  <!-- Command Palette Modal -->
+  <div id="cmdk" class="fixed inset-0 z-[60] hidden" aria-modal="true" role="dialog">
+    <div class="absolute inset-0 bg-black/40" role="button" aria-label="Close palette"></div>
+    <div class="relative mx-auto mt-24 w-[min(700px,92%)] rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-float animate-scaleIn">
+      <input id="cmdInput" placeholder="Search posts, tags… (Esc to close)" class="w-full h-14 px-5 rounded-t-2xl bg-transparent focus:outline-none" aria-label="Search posts" />
+      <div id="cmdList" class="max-h-80 overflow-auto divide-y divide-slate-200/60 dark:divide-slate-700/60"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Saved!</div>
+
+  <!-- JavaScript: tiny blog engine + router + PWA + feeds -->
+  <script>
+  // ---------- Site Config ----------
+  const SITE = {
+    title: 'My Blog',
+    url: 'https://example.com', // change to your domain
+    description: 'Clean UI. Smooth motion. Fast.',
+    author: 'Vishal',
+    email: 'hello@example.com'
+  };
+
+  // ---------- Posts (includes a brand-new long post) ----------
+  const POSTS = [
+    {
+      id: 101,
+      slug: 'build-a-fast-animated-blog-without-frameworks',
+      title: 'Build a Fast, Animated Blog Without Frameworks: A Practical Guide',
+      tag: 'Code',
+      read: '10 min read',
+      dateISO: '2025-11-04',
+      cover: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1400&auto=format&fit=crop',
+      excerpt: 'From routing to comments and offline support—this guide shows how to ship a beautiful, animated blog using only HTML, CSS, and vanilla JS.',
+      content: `
+        <p>Frameworks are great, but they are not required for every project. In this post, we build a production‑ready blog using only <code>HTML</code>, <code>Tailwind via CDN</code>, and <code>vanilla JavaScript</code>.</p>
+        <h2>What we\'re building</h2>
+        <ul>
+          <li>Hash router for pages and posts</li>
+          <li>Scroll‑reveal, parallax glow, and 3D tilt</li>
+          <li>Local comments, likes, and a command palette</li>
+          <li>RSS feed, sitemap.xml, robots.txt</li>
+          <li>PWA manifest and service worker for offline</li>
+        </ul>
+        <h2>Routing</h2>
+        <p>We use a tiny router that swaps content inside a single <code>&lt;main id=\"content\"&gt;</code>. It listens to <code>hashchange</code> and re‑renders.</p>
+        <h2>Performance</h2>
+        <p>Serve responsive images, avoid heavy libraries, and keep interactions subtle. Most animations run under 300ms with <em>ease‑out</em> easing.</p>
+        <h2>Going further</h2>
+        <p>When you outgrow this, port the routes into Next.js or Astro. You\'ll retain the exact structure while gaining SSG/ISR and MDX.</p>
+      `
+    },
+    {
+      id: 1,
+      slug: 'designing-with-motion',
+      title: 'Designing with motion: subtle interactions that delight',
+      tag: 'Design',
+      read: '7 min read',
+      dateISO: '2025-10-12',
+      cover: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=1400&auto=format&fit=crop',
+      excerpt: 'How to use micro‑interactions, timing, and easing to create experiences that feel alive—without overwhelm.',
+      content: `
+        <p>Motion is a language. Used wisely, it guides attention, sets expectations, and adds personality.</p>
+        <h2>Principles</h2>
+        <ul>
+          <li>Animate <em>relationship</em>, not just property changes.</li>
+          <li>Use easing that matches physical intuition (ease‑out for entrances).</li>
+          <li>Prefer <strong>micro</strong> over macro; keep durations under 300ms.</li>
+        </ul>
+        <blockquote>Animation should clarify, never distract.</blockquote>
+        <p>Start with hover states, then layer scroll‑reveals and page transitions.</p>
+      `
+    },
+    { id: 2, slug: 'say-no-as-a-pm', title: 'The art of saying no as a PM', tag: 'Product', read: '5 min read', dateISO:'2025-09-18', cover:'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1200&auto=format&fit=crop', excerpt:'Prioritization is your superpower. Here\'s how to wield it without burning bridges.', content:`<p>Saying no protects the roadmap. Anchor decisions in strategy, not opinion.</p>` },
+    { id: 3, slug: 'tiny-component-library', title: 'Ship faster with a tiny component library', tag: 'Code', read: '6 min read', dateISO:'2025-07-10', cover:'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop', excerpt:'Consistency without heavyweight frameworks.', content:`<p>Start by extracting buttons, forms, and cards. Document usage in your repo.</p>` },
+    { id: 4, slug: 'deep-work-weeks', title: 'How I plan deep‑work weeks', tag: 'Life', read: '4 min read', dateISO:'2025-06-26', cover:'https://images.unsplash.com/photo-1537498425277-c283d32ef9db?q=80&w=1200&auto=format&fit=crop', excerpt:'Rituals, routines, and recovery to do your best thinking.', content:`<p>Protect mornings, batch meetings, and set phone to grayscale.</p>` },
+  ].sort((a,b)=> new Date(b.dateISO) - new Date(a.dateISO));
+
+  // ---------- Helpers ----------
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+  const fmtDate = iso => new Date(iso+'T00:00:00').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const setTitle = t => { document.title = t ? `${t} — ${SITE.title}` : `${SITE.title} — Delightfully Animated`; };
+  const toast = (msg='Saved!') => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+
+  // ---------- Components ----------
+  function PostCard(p){
+    return `
+    <article class="post-card rounded-2xl overflow-hidden border border-slate-200/70 dark:border-slate-700/50 bg-white/70 dark:bg-slate-800/50 reveal tilt">
+      <a href="#/post/${p.slug}" class="block"><img src="${p.cover}" alt="${p.title}" class="h-44 w-full object-cover" loading="lazy"></a>
+      <div class="p-5 tilt-inner">
+        <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <span class="tag px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800">${p.tag}</span>
+          <span class="read">${p.read}</span>
+          <time datetime="${p.dateISO}" class="date">${fmtDate(p.dateISO)}</time>
+        </div>
+        <h3 class="mt-3 text-lg font-semibold"><a class="title hover:text-sky-600 dark:hover:text-sky-400" href="#/post/${p.slug}">${p.title}</a></h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 excerpt">${p.excerpt}</p>
+      </div>
+    </article>`;
+  }
+
+  function Home(){
+    setTitle('Home');
+    const [featured, ...rest] = POSTS;
+    return `
+    <div class="grid lg:grid-cols-3 gap-10">
+      <section class="lg:col-span-2 space-y-8">
+        <article class="group rounded-2xl overflow-hidden border border-slate-200/70 dark:border-slate-700/50 bg-white/70 dark:bg-slate-800/50 shadow-soft tilt reveal">
+          <a href="#/post/${featured.slug}" class="block">
+            <div class="relative">
+              <img class="h-64 w-full object-cover group-hover:scale-[1.02] duration-300" src="${featured.cover}" alt="Featured post cover">
+              <span class="absolute bottom-4 left-4 px-3 py-1 rounded-lg bg-black/60 text-white text-xs backdrop-blur">Featured</span>
+            </div>
+          </a>
+          <div class="p-6 tilt-inner">
+            <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <span class="px-2 py-1 rounded-md bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">${featured.tag}</span>
+              <span>${featured.read}</span>
+              <time datetime="${featured.dateISO}">${fmtDate(featured.dateISO)}</time>
+            </div>
+            <h2 class="mt-3 text-2xl font-bold"><a href="#/post/${featured.slug}" class="hover:text-sky-600 dark:hover:text-sky-400">${featured.title}</a></h2>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">${featured.excerpt}</p>
+            <a href="#/post/${featured.slug}" class="mt-4 inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-medium">Read more →</a>
+          </div>
+        </article>
+        <div class="grid sm:grid-cols-2 gap-6" id="posts">
+          ${rest.map(PostCard).join('')}
+        </div>
+      </section>
+      <aside class="space-y-8">
+        ${About()}
+        ${Newsletter()}
+        ${Tags()}
+        ${Follow()}
+      </aside>
+    </div>`;
+  }
+
+  function About(){
+    return `
+    <div id="aboutCard" class="rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-white/70 dark:bg-slate-800/50 p-6 reveal">
+      <div class="flex items-center gap-4">
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=VK&backgroundType=gradientLinear" alt="Avatar" class="h-14 w-14 rounded-xl" />
+        <div>
+          <h3 class="font-semibold text-lg">Vishal Kumar</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Graphic designer & storyteller. I write about design, code, and careers.</p>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const Newsletter = () => `
+    <div class="rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-gradient-to-br from-sky-50 to-white dark:from-slate-800/70 dark:to-slate-800/30 p-6 reveal">
+      <h3 class="font-semibold text-lg">Get new posts via email</h3>
+      <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">No spam. Unsubscribe anytime.</p>
+      <form id="nlSidebar" class="mt-4">
+        <label for="email" class="sr-only">Email</label>
+        <input name="email" type="email" required placeholder="you@example.com" class="h-11 w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/60 px-3 text-sm" />
+        <button class="mt-3 w-full h-11 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 text-white font-medium shadow-float">Subscribe</button>
+      </form>
+    </div>`;
+
+  const Tags = () => {
+    const all = [...new Set(POSTS.map(p=>p.tag))];
+    return `
+    <div id="categories" class="rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-white/70 dark:bg-slate-800/50 p-6 reveal">
+      <h3 class="font-semibold text-lg">Popular tags</h3>
+      <div class="mt-3 flex flex-wrap gap-2">
+        ${all.map(t=>`<a href="#/tag/${encodeURIComponent(t)}" class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm">${t}</a>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  const Follow = () => `
+    <div class="rounded-2xl border border-slate-200/70 dark:border-slate-700/50 bg-white/70 dark:bg-slate-800/50 p-6 reveal">
+      <h3 class="font-semibold text-lg">Follow</h3>
+      <div class="mt-3 flex gap-3">
+        <a href="#" class="inline-flex items-center gap-2 rounded-lg border border-slate-200/70 dark:border-slate-700/60 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Twitter</a>
+        <a href="#" class="inline-flex items-center gap-2 rounded-lg border border-slate-200/70 dark:border-slate-700/60 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">YouTube</a>
+        <a href="#" class="inline-flex items-center gap-2 rounded-lg border border-slate-200/70 dark:border-slate-700/60 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Instagram</a>
+      </div>
+    </div>`;
+
+  function PostPage(slug){
+    const p = POSTS.find(x=>x.slug===slug);
+    if(!p) return NotFound();
+    setTitle(p.title);
+    updateJsonLD('BlogPosting', p);
+    const liked = localStorage.getItem('like_'+slug)==='1';
+    const comments = JSON.parse(localStorage.getItem('comments_'+slug)||'[]');
+    const related = POSTS.filter(x=>x.tag===p.tag && x.slug!==slug).slice(0,3);
+    return `
+    <article class="max-w-3xl mx-auto">
+      <a href="#/" class="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400">← Back</a>
+      <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold">${p.title}</h1>
+      <div class="mt-2 flex items-center gap-3 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <span class="px-2 py-1 rounded-md bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">${p.tag}</span>
+        <span>${p.read}</span>
+        <time datetime="${p.dateISO}">${fmtDate(p.dateISO)}</time>
+      </div>
+      <img src="${p.cover}" alt="${p.title}" class="mt-5 w-full max-h-[480px] object-cover rounded-2xl shadow-soft" />
+      <div class="prose mt-6">${p.content}</div>
+      <div class="mt-6 flex gap-3">
+        <button id="likeBtn" class="rounded-xl border px-4 py-2 ${liked?'bg-rose-600 text-white border-rose-600':'border-slate-300 dark:border-slate-600'}" aria-pressed="${liked}">❤ Like</button>
+        <button id="shareBtn" class="rounded-xl border px-4 py-2 border-slate-300 dark:border-slate-600">Share</button>
+        <button id="copyBtn" class="rounded-xl border px-4 py-2 border-slate-300 dark:border-slate-600">Copy Link</button>
+      </div>
+
+      <section class="mt-10">
+        <h3 class="font-semibold text-xl">Comments</h3>
+        <form id="commentForm" class="mt-3 grid gap-2">
+          <input name="name" placeholder="Your name" required class="h-10 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/60 px-3 text-sm" />
+          <textarea name="body" placeholder="Write a comment…" required class="min-h-[100px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/60 px-3 py-2 text-sm"></textarea>
+          <button class="justify-self-start rounded-lg bg-sky-600 text-white px-4 py-2">Post Comment</button>
+        </form>
+        <ul id="commentList" class="mt-4 space-y-3">${comments.map(c=>`<li class='rounded-lg border border-slate-200 dark:border-slate-700 p-3'><b>${c.name}</b><div class='text-sm opacity-80'>${c.body}</div></li>`).join('')}</ul>
+      </section>
+
+      ${related.length?`<section class="mt-12"><h3 class="font-semibold text-xl">Related</h3><div class="mt-4 grid sm:grid-cols-2 gap-4">${related.map(PostCard).join('')}</div></section>`:''}
+    </article>`;
+  }
+
+  const NotFound = () => `<div class="max-w-3xl mx-auto text-center py-20"><h2 class="text-3xl font-bold">404</h2><p class="mt-2 text-slate-500">That page doesn\'t exist.</p><a href="#/" class="text-sky-600">Go home</a></div>`;
+  const SimplePage = (title, body) => { setTitle(title); updateJsonLD('WebPage', {title}); return `<article class='max-w-3xl mx-auto prose'><h1>${title}</h1>${body}</article>` };
+
+  function TagPage(tag){
+    const list = POSTS.filter(p=>p.tag.toLowerCase()===decodeURIComponent(tag).toLowerCase());
+    setTitle(`#${decodeURIComponent(tag)}`);
+    updateJsonLD('CollectionPage', {title: '#'+decodeURIComponent(tag)});
+    return `<div class='max-w-6xl mx-auto'><h2 class='text-2xl font-bold mb-4'>#${decodeURIComponent(tag)}</h2><div class='grid sm:grid-cols-2 gap-6'>${list.map(PostCard).join('')||'<p>No posts yet.</p>'}</div></div>`;
+  }
+
+  function TagsIndex(){
+    const groups = POSTS.reduce((m,p)=>{(m[p.tag]??=[]).push(p);return m;},{});
+    setTitle('Tags'); updateJsonLD('CollectionPage',{title:'Tags'});
+    return `<div class='max-w-6xl mx-auto'><h2 class='text-2xl font-bold mb-4'>Tags</h2>${Object.entries(groups).map(([t,arr])=>`<section class='mb-8'><h3 class='font-semibold text-lg mb-2'>${t}</h3><div class='grid sm:grid-cols-2 gap-6'>${arr.map(PostCard).join('')}</div></section>`).join('')}</div>`;
+  }
+
+  // ---------- Feeds & SEO utilities ----------
+  function makeRSS(){
+    const items = POSTS.map(p=>`<item><title>${escapeXML(p.title)}</title><link>${SITE.url}/#/post/${p.slug}</link><guid>${SITE.url}/#/post/${p.slug}</guid><pubDate>${new Date(p.dateISO).toUTCString()}</pubDate><description>${escapeXML(p.excerpt)}</description></item>`).join('');
+    return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${escapeXML(SITE.title)}</title><link>${SITE.url}</link><description>${escapeXML(SITE.description)}</description>${items}</channel></rss>`;
+  }
+  function makeSitemap(){
+    const urls = ['#/', '#/tags', '#/about', '#/contact', ...POSTS.map(p=>'#/post/'+p.slug)].map(h=>`<url><loc>${SITE.url}/${h}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`).join('');
+    return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+  }
+  function makeRobots(){
+    return `User-agent: *
+Allow: /
+Sitemap: ${SITE.url}/#/sitemap`;
+  }
+  const escapeXML = s => s.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+  // ---------- Router ----------
+  const routes = {
+    '': Home,
+    '#/': Home,
+    '#/post/': (slug) => PostPage(slug),
+    '#/tag/': (tag) => TagPage(tag),
+    '#/about': () => SimplePage('About', `<p>Hi, I\'m Vishal — a graphic designer and storyteller. This blog mixes design, code, and career notes.</p>`),
+    '#/contact': () => SimplePage('Contact', `<p>Email me at <a href='mailto:${SITE.email}'>${SITE.email}</a>.</p>`),
+    '#/tags': () => TagsIndex(),
+    '#/rss': () => downloadText('rss.xml', makeRSS(), 'application/rss+xml', 'Generating RSS…'),
+    '#/sitemap': () => downloadText('sitemap.xml', makeSitemap(), 'application/xml', 'Generating sitemap…'),
+    '#/robots': () => downloadText('robots.txt', makeRobots(), 'text/plain', 'Generating robots.txt…'),
+    '#/privacy': () => SimplePage('Privacy', `<p>We store minimal data in your browser (likes, comments you post locally, and newsletter email if you submit it). We do not send any data to a server.</p>`),
+  };
+
+  function render(){
+    const hash = location.hash || '#/';
+    const outlet = document.getElementById('content');
+    if(hash.startsWith('#/post/')) outlet.innerHTML = routes['#/post/'](decodeURIComponent(hash.split('/').slice(2).join('/')));
+    else if(hash.startsWith('#/tag/')) outlet.innerHTML = routes['#/tag/'](decodeURIComponent(hash.split('/').slice(2).join('/')));
+    else if(routes[hash]){ const out = routes[hash](); if(typeof out === 'string') outlet.innerHTML = out; }
+    else outlet.innerHTML = NotFound();
+    enhance();
+  }
+
+  // ---------- Enhance / bind events after render ----------
+  function enhance(){
+    // Intersection reveal
+    const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('animate-fadeUp'); observer.unobserve(e.target); } }); }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Tilt
+    document.querySelectorAll('.tilt').forEach(card => attachTilt(card));
+
+    // Search
+    const s = document.getElementById('search');
+    const ms = document.getElementById('msearch');
+    const filter = (q)=>{ $$('#posts .post-card').forEach(card=>{ const t=card.querySelector('.title')?.textContent.toLowerCase()||''; const x=card.querySelector('.excerpt')?.textContent.toLowerCase()||''; const tag=card.querySelector('.tag')?.textContent.toLowerCase()||''; card.style.display=(t+x+tag).includes(q.toLowerCase())?'':'none'; }); };
+    s && s.addEventListener('input', e=>filter(e.target.value));
+    ms && ms.addEventListener('input', e=>filter(e.target.value));
+
+    // Newsletter demo storage
+    $$('#nlSidebar, #newsletter').forEach(form=> form?.addEventListener('submit', e=>{ e.preventDefault(); const email = new FormData(form).get('email'); localStorage.setItem('newsletter_email', email); toast('Subscribed ✔'); form.reset(); }));
+
+    // Post actions
+    const likeBtn = $('#likeBtn');
+    const shareBtn = $('#shareBtn');
+    const copyBtn = $('#copyBtn');
+    if(likeBtn){ likeBtn.addEventListener('click', ()=>{ const slug = location.hash.split('/').slice(2).join('/'); const key='like_'+slug; const now = localStorage.getItem(key)==='1'; localStorage.setItem(key, now?'0':'1'); likeBtn.classList.toggle('bg-rose-600'); likeBtn.classList.toggle('text-white'); likeBtn.classList.toggle('border-rose-600'); likeBtn.setAttribute('aria-pressed', (!now).toString()); }); }
+    shareBtn && shareBtn.addEventListener('click', async ()=>{ try{ await navigator.share({ title: document.title, url: location.href }); }catch{ toast('Share not supported'); }});
+    copyBtn && copyBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(location.href).then(()=>toast('Link copied')); });
+
+    // Comments
+    const form = $('#commentForm');
+    const list = $('#commentList');
+    if(form && list){
+      form.addEventListener('submit', e=>{ e.preventDefault(); const fd=new FormData(form); const name=fd.get('name'); const body=fd.get('body'); const slug = location.hash.split('/').slice(2).join('/'); const key='comments_'+slug; const arr = JSON.parse(localStorage.getItem(key)||'[]'); arr.push({name, body}); localStorage.setItem(key, JSON.stringify(arr)); list.insertAdjacentHTML('beforeend', `<li class='rounded-lg border border-slate-200 dark:border-slate-700 p-3'><b>${name}</b><div class='text-sm opacity-80'>${body}</div></li>`); form.reset(); toast('Comment posted'); });
+    }
+  }
+
+  // ---------- Visual niceties ----------
+  function attachTilt(card){
+    const inner = card.querySelector('.tilt-inner'); if(!inner) return; const bounds = () => card.getBoundingClientRect(); let raf = null;
+    function onMove(e){ const b=bounds(); const cx=e.clientX??(e.touches?.[0]?.clientX||0); const cy=e.clientY??(e.touches?.[0]?.clientY||0); const rx=((cy-b.top)/b.height-.5)*-6; const ry=((cx-b.left)/b.width-.5)*8; cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ card.style.transform=`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`; }); }
+    function reset(){ card.style.transform=''; }
+    card.addEventListener('mousemove', onMove); card.addEventListener('mouseleave', reset); card.addEventListener('touchmove', onMove, {passive:true}); card.addEventListener('touchend', reset);
+  }
+
+  // ---------- Download helpers (RSS, sitemap, robots) ----------
+  function downloadText(name, text, type='text/plain', toastMsg=''){
+    const blob = new Blob([text], {type});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    if(toastMsg) toast(toastMsg);
+    return `<article class='max-w-3xl mx-auto prose'><h1>${name}</h1><p>Your ${name} is downloading. If not, <a href='${url}'>click here</a>.</p></article>`;
+  }
+
+  // ---------- JSON-LD ----------
+  function updateJsonLD(type, data){
+    const el = document.getElementById('jsonld');
+    const base = { '@context': 'https://schema.org', '@type': type, name: SITE.title, url: SITE.url, description: SITE.description, publisher: { '@type':'Person', name: SITE.author } };
+    if(type==='BlogPosting' && data){ Object.assign(base, { '@type':'BlogPosting', headline: data.title, datePublished: data.dateISO, image: data.cover, author: { '@type':'Person', name: SITE.author } }); }
+    if(type==='WebPage' && data?.title){ base.name = data.title; base.headline = data.title; }
+    el.textContent = JSON.stringify(base);
+  }
+
+  // ---------- Manifest + Service Worker (PWA offline) ----------
+  (function setupPWA(){
+    const manifest = { name: SITE.title, short_name: SITE.title, start_url: '/', display: 'standalone', background_color: '#0b1220', theme_color: '#0ea5e9', icons: [] };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('manifestLink').setAttribute('href', url);
+
+    if('serviceWorker' in navigator){
+      const swCode = `const CACHE='blog-v1'; const ASSETS=['./']; self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))}); self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request, copy)); return res;})).catch(()=>caches.match('./')))})`;
+      const swUrl = URL.createObjectURL(new Blob([swCode], {type:'text/javascript'}));
+      navigator.serviceWorker.register(swUrl).catch(console.warn);
+    }
+  })();
+
+  // ---------- Theme, nav, palette, progress, parallax ----------
+  const rootEl = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark' || (!savedTheme && matchMedia('(prefers-color-scheme: dark)').matches)) { rootEl.classList.add('dark'); themeIcon.textContent='☀️'; }
+  themeToggle.addEventListener('click', ()=>{ rootEl.classList.toggle('dark'); const isDark=rootEl.classList.contains('dark'); themeIcon.textContent=isDark?'☀️':'🌙'; localStorage.setItem('theme', isDark?'dark':'light'); });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn?.addEventListener('click', ()=> mobileNav.classList.toggle('hidden'));
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const progress = document.getElementById('progress');
+  const arc = document.getElementById('progressArc');
+  function updateProgress(){ const s=scrollY; const h=document.body.scrollHeight - innerHeight; const p=Math.min(100, Math.max(0, (s/h)*100)); arc.style.strokeDashoffset=(100-p).toFixed(2); $$('.parallax').forEach(el=>el.style.setProperty('--scroll', s)); }
+  updateProgress(); addEventListener('scroll', updateProgress, { passive:true });
+  progress.addEventListener('click', ()=> scrollTo({ top:0, behavior:'smooth' }));
+
+  const fab = document.getElementById('fab');
+  const cmdk = document.getElementById('cmdk');
+  const cmdInput = document.getElementById('cmdInput');
+  const cmdList = document.getElementById('cmdList');
+  function openCmd(){ cmdk.classList.remove('hidden'); cmdInput.value=''; buildCmdList(''); cmdInput.focus(); }
+  function closeCmd(){ cmdk.classList.add('hidden'); }
+  function buildCmdList(q){ const items = POSTS.filter(p => (p.title+' '+p.tag).toLowerCase().includes(q.toLowerCase())); cmdList.innerHTML = items.map(i=>`<a href="#/post/${i.slug}" class='block px-5 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between'><span class='font-medium'>${i.title}</span><span class='text-xs text-slate-500'>${i.tag}</span></a>`).join('') || `<div class='px-5 py-6 text-sm text-slate-500'>No results</div>`; }
+  fab.addEventListener('click', openCmd);
+  document.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); openCmd(); } if(e.key==='Escape'){ closeCmd(); } });
+  cmdk.querySelector('div[role="button"]').addEventListener('click', closeCmd);
+  cmdInput.addEventListener('input', e=> buildCmdList(e.target.value));
+
+  // ---------- Router boot ----------
+  addEventListener('hashchange', render);
+  render();
+
+  // ---------- Analytics hook (swap to your provider) ----------
+  window.analytics = { track: (ev, data={}) => { console.log('[analytics]', ev, data); } };
+  </script>
+</body>
+</html>
